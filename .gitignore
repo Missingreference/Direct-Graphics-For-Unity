@@ -2,6 +2,7 @@
 *.vcxproj.user
 *.VC.opendb
 .vs
+*.DS_Store
 
 xcuserdata
 *.xcworkspace
