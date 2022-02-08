@@ -150,6 +150,16 @@ namespace Elanetic.Graphics
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexture.GetNativeTexturePtr());
         }
 
+        static public void ClearTexture(Color color, IntPtr targetTexturePointer)
+        {
+            SetTextureColor(color.r, color.g, color.b, color.a, targetTexturePointer);
+        }
+
+        static public void ClearTexture(IntPtr targetTexturePointer)
+        {
+            SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexturePointer);
+        }
+
 #if UNITY_EDITOR
         static private void OnPlayModeChanged(PlayModeStateChange state)
         {
