@@ -106,11 +106,15 @@ namespace Elanetic.Graphics
             {
                 throw new ArgumentException("Inputted texture format '" + textureFormat.ToString() + "' has not been implemented in Elanetic.Graphics.Internal.NativeTextureFormatLookup.", nameof(textureFormat));
             }
+            if(width <= 0 || height <= 0)
+            {
+                throw new ArgumentException("The width and height of the texture to be created must be more than zero. Inputted size: " + width.ToString() + ", " + height.ToString());
+            }
 #endif
             int textureIndex = CreateNativeTexture(width, height, TEXTURE_FORMAT_LOOKUP[(int)textureFormat]);
             if(textureIndex < 0)
             {
-                //Comment out this exception if implementing a new graphics API. Sometimes if your lucky you'll get a stack trace from Unity's editor log file for the dll.
+                //Comment out this exception if implementing a new graphics API for debugging purposes. Sometimes if your lucky you'll get a stack trace from Unity's editor log file for the dll.
                 throw new SystemException("Texture creation failed. Usually occurs when graphics memory has run out or unsupported input texture size or texture format.");
             }
 
