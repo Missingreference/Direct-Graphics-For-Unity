@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using Elanetic.Tools;
-
 namespace Elanetic.Graphics
 {
     /// <summary>
@@ -51,6 +49,7 @@ namespace Elanetic.Graphics
             isDestroyed = true;
             if(Time.renderedFrameCount - m_FrameCreated < 2)
             {
+
                 //We must wait to deallocate this texture. On Vulkan(untested on other Graphics APIs) where calling Texture2D.CreateExternalTexture, Unity creates another thread perceived from the following crash stacktrace:
                 /*
                 0x00007FFEA6FE8498(nvoglv64) vkGetInstanceProcAddr
@@ -68,7 +67,16 @@ namespace Elanetic.Graphics
                 //This causes a race condition while Unity's Vulkan is creating an ImageView for our texture while we are trying to deallocate the memory.
                 //Destruction of our VkImage reference too early causes a crash.
                 //Wait a couple frames just to be safe.
-               m_DestructionCoroutine = GlobalCoroutine.Run(OnEndFrame());
+
+                if(ReferenceEquals(m_DestroyerObject,null))
+                {
+                    m_DestroyerObject = new GameObject("Direct Texture2D Destroyer").AddComponent<Direct2DTextureDestroyer>();
+                }
+                else if(m_DestroyerObject.unityIsQuitting)
+                {
+                    return;
+                }
+                m_DestructionCoroutine = m_DestroyerObject.StartCoroutine(OnEndFrame());
             }
             else
             {
@@ -88,8 +96,41 @@ namespace Elanetic.Graphics
             //Delay destroy by 2 frames to hopefully ensure the race condition has passed
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
-            GlobalCoroutine.Stop(m_DestructionCoroutine);
+            m_DestroyerObject.StopCoroutine(m_DestructionCoroutine);
             DoDestroy();
+        }
+
+        private static Direct2DTextureDestroyer m_DestroyerObject = null;
+
+        private class Direct2DTextureDestroyer : MonoBehaviour
+        {
+            public bool unityIsQuitting { get; private set; }
+
+            void Awake()
+            {
+                GameObject.DontDestroyOnLoad(m_DestroyerObject.gameObject);
+                gameObject.hideFlags = HideFlags.HideAndDontSave | HideFlags.HideInInspector;
+            }
+
+
+            void OnDisable()
+            {
+                if(unityIsQuitting) return;
+
+                throw new InvalidOperationException("DirectTexture2DDestroyer should never be disabled or destroyed during runtime. This will interrupt DirectTexture2D destruction and cause memory leaks.");
+            }
+
+            void OnDestroy()
+            {
+                if(unityIsQuitting) return;
+
+                throw new InvalidOperationException("DirectTexture2DDestroyer should never be destroyed during runtime. This will interrupt DirectTexture2D destruction and cause memory leaks.");
+            }
+
+            void OnApplicationQuit()
+            {
+                unityIsQuitting = true;
+            }
         }
 
     }
