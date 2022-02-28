@@ -1,10 +1,7 @@
 {
     "name": "Elanetic.Graphics",
     "rootNamespace": "",
-    "references": [
-        "Elanetic.Tools",
-        "Unity.TextMeshPro"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
