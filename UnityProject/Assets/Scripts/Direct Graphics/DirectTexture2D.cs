@@ -108,6 +108,7 @@ namespace Elanetic.Graphics
 
             void Awake()
             {
+                m_DestroyerObject = this;
                 GameObject.DontDestroyOnLoad(m_DestroyerObject.gameObject);
                 gameObject.hideFlags = HideFlags.HideAndDontSave | HideFlags.HideInInspector;
             }
