@@ -18,7 +18,9 @@ namespace Elanetic.Graphics
     /// Fast functions to do work on the GPU. Uses a native plugin for each Graphics API to send command buffers on the GPU.
     /// Platform support is limited.
     /// </summary>
+    #if UNITY_EDITOR
     [InitializeOnLoad]
+    #endif
     static public class DirectGraphics
     {
         #region External Functions
