@@ -158,7 +158,7 @@ namespace Elanetic.Graphics.Internal
              0, //[60] Invalid
              0, //[61] Invalid
             -1, //[62] RG16               -> Unimplemented
-            -1, //[63] R8                 -> Unimplemented
+             9, //[63] R8                 -> VK_FORMAT_R8_UNORM
             -1, //[64] ETC_RGB4Crunched   -> Unimplemented
             -1, //[65] ETC2_RGBA8Crunched -> Unimplemented
             -1, //[66] ASTC_HDR_4x4       -> Unimplemented
