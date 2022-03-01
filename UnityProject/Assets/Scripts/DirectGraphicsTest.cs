@@ -26,6 +26,11 @@ public class DirectGraphicsTest : MonoBehaviour
 
 	public TextMeshProUGUI textureStepText;
 
+	Texture2D unityTexture;
+	IntPtr unityTexturePointer;
+	DirectTexture2D sourceDirectTexture;
+	DirectTexture2D destinationDirectTexture;
+
 	void Start()
 	{
 		//Load textures
@@ -49,6 +54,11 @@ public class DirectGraphicsTest : MonoBehaviour
 		rawImage4.texture = null;
 		rawImage4.color = Color.white;
 
+
+		unityTexture = new Texture2D(1024, 1024, TextureFormat.RGBA32, false, true);
+		unityTexturePointer = unityTexture.GetNativeTexturePtr();
+		sourceDirectTexture = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
+		destinationDirectTexture = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
 	}
 
 	[Range(0,511)]
@@ -57,6 +67,11 @@ public class DirectGraphicsTest : MonoBehaviour
 	int textureTestStep = -1;
     void Update()
 	{
+        for(int i = 0; i < 800; i++)
+        {
+			DirectGraphics.CopyTexture(sourceDirectTexture.nativePointer, 0,0, 1024, 1024, unityTexturePointer, 0, 0);
+			DirectGraphics.ClearTexture(destinationDirectTexture.nativePointer);
+		}
 
 		if(Input.GetKeyDown(KeyCode.P))
 		{

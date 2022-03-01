@@ -149,29 +149,57 @@ namespace Elanetic.Graphics
         /// </summary>
         static public void CopyTexture(IntPtr sourceNativePointer, int sourceX, int sourceY, int width, int height, IntPtr destinationNativePointer, int destinationX, int destinationY)
         {
+            SyncRenderingThread();
             CopyTextures(sourceNativePointer, sourceX, sourceY, width, height, destinationNativePointer, destinationX, destinationY);
         }
 
         static public void ClearTexture(Color color, Texture2D targetTexture)
         {
+            SyncRenderingThread();
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Texture2D targetTexture)
         {
+            SyncRenderingThread();
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Color color, IntPtr targetTexturePointer)
         {
+            SyncRenderingThread();
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexturePointer);
         }
 
         static public void ClearTexture(IntPtr targetTexturePointer)
         {
+            SyncRenderingThread();
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexturePointer);
         }
 
+        static private DirectTexture2D m_SyncTexture;
+        static private int m_LastEncodeFrame = -1;
+        static private void SyncRenderingThread()
+        {
+            if(m_LastEncodeFrame < Time.renderedFrameCount)
+            {
+                //As per Unity documentation calling this method syncs the rendering thread to the main thread.
+                //While it is a slow operation, in Metal it has been found that there is some kind of race condition with encoding commands to Unity's command buffer.
+                //The error being: -[MTLIOAccelCommandBuffer validate]:208: failed assertion `commit command buffer with uncommitted encoder'
+                //Very little information on this is found online regarding this issue so it can only be assumed that it is how Unity itself works.
+                //The working hypothesis is that if the Unity's command buffer is committed while trying to create an encoder or actively encoding this assertion will hit and crash Unity. Safety checks don't fix this.
+                //A better fix would be to queue these encodes and then wait for an event for when the command buffer is available. Blocking the main thread like this is slow and bad.
+                m_SyncTexture.texture.GetNativeTexturePtr();
+                m_LastEncodeFrame = Time.renderedFrameCount;
+            }
+        }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static private void InitSyncTexture()
+        {
+            if(m_SyncTexture != null) return;
+
+            m_SyncTexture = CreateTexture(1, 1, TextureFormat.R8);
+        }
 #if UNITY_EDITOR
         static private void OnPlayModeChanged(PlayModeStateChange state)
         {

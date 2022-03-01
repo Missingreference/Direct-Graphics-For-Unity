@@ -214,15 +214,17 @@ void RenderAPI_Metal::EndModifyTexture(void* textureHandle, int textureWidth, in
 
 void RenderAPI_Metal::DoCopyTexture(void *sourceTexture, int sourceX, int sourceY, int sourceWidth, int sourceHeight, void *destinationTexture, int destinationX, int destinationY)
 {
+    m_MetalGraphics->EndCurrentCommandEncoder();
+    
     id<MTLTexture> sourceTex = (__bridge id<MTLTexture>)sourceTexture;
     id<MTLTexture> destinationTex = (__bridge id<MTLTexture>)destinationTexture;
     id<MTLCommandBuffer> commandBuffer = m_MetalGraphics->CurrentCommandBuffer();
+    
     id<MTLBlitCommandEncoder> blitCommand = [commandBuffer blitCommandEncoder];
     [blitCommand optimizeContentsForGPUAccess:sourceTex];
     [blitCommand optimizeContentsForGPUAccess:destinationTex];
     [blitCommand copyFromTexture:sourceTex sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(sourceX,sourceY,0) sourceSize:MTLSizeMake(sourceWidth, sourceHeight, 1) toTexture:destinationTex destinationSlice:0 destinationLevel:0 destinationOrigin:MTLOriginMake(destinationX,destinationY,0)];
     [blitCommand endEncoding];
-    
 }
 
 bool RenderAPI_Metal::CreateTexture(int width, int height, int pixelFormat, int textureIndex)
@@ -268,6 +270,7 @@ void RenderAPI_Metal::SetTextureColor(float red, float green, float blue, float 
     rpdesc.colorAttachments[0].clearColor = MTLClearColorMake((double)red, (double)green, (double)blue, (double)alpha);
     rpdesc.colorAttachments[0].loadAction = MTLLoadActionClear;
     rpdesc.colorAttachments[0].texture = (__bridge id<MTLTexture>)targetTexture;
+    m_MetalGraphics->EndCurrentCommandEncoder();
     id<MTLCommandBuffer> commandBuffer = m_MetalGraphics->CurrentCommandBuffer();
     id <MTLRenderCommandEncoder> commandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:rpdesc];
     [commandEncoder endEncoding];
