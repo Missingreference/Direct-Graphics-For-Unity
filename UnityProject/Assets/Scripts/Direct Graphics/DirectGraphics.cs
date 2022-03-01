@@ -119,7 +119,14 @@ namespace Elanetic.Graphics
             }
 
             DirectTexture2D directTexture = new DirectTexture2D(textureIndex, width, height, textureFormat, GetNativeTexturePointer(textureIndex));
-            m_AllTextures.Add(directTexture);
+            if(textureIndex >= m_AllTextures.Count)
+            {
+                m_AllTextures.Add(directTexture);
+            }
+            else
+            {
+                m_AllTextures[textureIndex] = directTexture;
+            }
             return directTexture;
         }
 
@@ -132,6 +139,7 @@ namespace Elanetic.Graphics
         {
             CopyTexture(source.GetNativeTexturePtr(), sourceX, sourceY, width, height, destination.GetNativeTexturePtr(), destinationX, destinationY);
         }
+
 
         /// <summary>
         /// Cache Texture2D.GetNativeTexturePtr() pointer and use this function since calling the other function is slower.
