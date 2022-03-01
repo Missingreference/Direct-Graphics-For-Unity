@@ -58,7 +58,12 @@ public class DirectGraphicsTest : MonoBehaviour
 		unityTexture = new Texture2D(1024, 1024, TextureFormat.RGBA32, false, true);
 		unityTexturePointer = unityTexture.GetNativeTexturePtr();
 		sourceDirectTexture = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
+		DirectGraphics.ClearTexture(Color.red, sourceDirectTexture.texture);
 		destinationDirectTexture = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
+
+		rawImage1.texture = sourceDirectTexture.texture;
+		rawImage2.texture = destinationDirectTexture.texture;
+		rawImage3.texture = unityTexture;
 	}
 
 	[Range(0,511)]
@@ -67,10 +72,15 @@ public class DirectGraphicsTest : MonoBehaviour
 	int textureTestStep = -1;
     void Update()
 	{
-        for(int i = 0; i < 800; i++)
+        for(int i = 0; i < 5000; i++)
         {
 			DirectGraphics.CopyTexture(sourceDirectTexture.nativePointer, 0,0, 1024, 1024, unityTexturePointer, 0, 0);
 			DirectGraphics.ClearTexture(destinationDirectTexture.nativePointer);
+		}
+
+		if(Time.renderedFrameCount % 2 == 0)
+		{
+			DirectGraphics.ClearTexture(unityTexturePointer);
 		}
 
 		if(Input.GetKeyDown(KeyCode.P))

@@ -191,6 +191,9 @@ namespace Elanetic.Graphics
                 //Very little information on this is found online regarding this issue so it can only be assumed that it is how Unity itself works.
                 //The working hypothesis is that if the Unity's command buffer is committed while trying to create an encoder or actively encoding this assertion will hit and crash Unity. Safety checks don't fix this.
                 //A better fix would be to queue these encodes and then wait for an event for when the command buffer is available. Blocking the main thread like this is slow and bad.
+
+                //Now as for Vulkan... The Unity editor crashes when you open the Build Settings and/or Player Settings. Stacktrace stops at RenderAPI_Vulkan::DoCopyTexture.
+                //Crashes in Vulkan build right away.
                 m_SyncTexture.texture.GetNativeTexturePtr();
                 m_LastEncodeFrame = Time.renderedFrameCount;
             }
