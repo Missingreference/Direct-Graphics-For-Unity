@@ -72,16 +72,6 @@ public class DirectGraphicsTest : MonoBehaviour
 	int textureTestStep = -1;
     void Update()
 	{
-        for(int i = 0; i < 5000; i++)
-        {
-			DirectGraphics.CopyTexture(sourceDirectTexture.nativePointer, 0,0, 1024, 1024, unityTexturePointer, 0, 0);
-			DirectGraphics.ClearTexture(destinationDirectTexture.nativePointer);
-		}
-
-		if(Time.renderedFrameCount % 2 == 0)
-		{
-			DirectGraphics.ClearTexture(unityTexturePointer);
-		}
 
 		if(Input.GetKeyDown(KeyCode.P))
 		{
@@ -101,18 +91,22 @@ public class DirectGraphicsTest : MonoBehaviour
 					CreateAndDestroyMultipleTest();
 					break;
 				case 3:
+					textureStepText.text = "Create and Clear Test";
+					CreateAndClearTest();
+					break;
+				case 4:
 					textureStepText.text = "Copy Texture Test";
 					CopyTextureTest();
 					break;
-				case 4:
+				case 5:
 					textureStepText.text = "Clear Color Texture Test";
 					ClearColorTextureTest();
 					break;
-				case 5:
+				case 6:
 					textureStepText.text = "Clear Texture Test";
 					ClearTextureTest();
 					break;
-				case 6:
+				case 7:
 					textureStepText.text = "Copy Texture Offset Test";
 					CopyTextureOffsetTest();
 					break;
@@ -123,7 +117,7 @@ public class DirectGraphicsTest : MonoBehaviour
 
         }
 
-		if(textureTestStep == 6)
+		if(textureTestStep == 7)
         {
 			rawImage2.texture = directTextures[visibleTextureIndex].texture;
         }
@@ -162,8 +156,17 @@ public class DirectGraphicsTest : MonoBehaviour
 		directTextures.Clear();
     }
 
+	private void CreateAndClearTest()
+	{
+		dt1 = DirectGraphics.CreateTexture(textureSize, textureSize, TextureFormat.RGBA32);
+		rawImage1.texture = dt1.texture;
+		DirectGraphics.ClearTexture(Color.blue, dt1.texture);
+	}
+
 	private void CopyTextureTest()
     {
+		dt1.Destroy();
+
 		dt1 = DirectGraphics.CreateTexture(textureSize, textureSize, TextureFormat.RGBA32);
 		dt2 = DirectGraphics.CreateTexture(textureSize, textureSize, TextureFormat.RGBA32);
 		dt3 = DirectGraphics.CreateTexture(textureSize, textureSize, TextureFormat.RGBA32);

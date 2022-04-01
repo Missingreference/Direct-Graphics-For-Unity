@@ -157,25 +157,25 @@ namespace Elanetic.Graphics
 
         static public void ClearTexture(Color color, Texture2D targetTexture)
         {
-            SyncRenderingThread();
+            //SyncRenderingThread();
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Texture2D targetTexture)
         {
-            SyncRenderingThread();
+           // SyncRenderingThread();
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Color color, IntPtr targetTexturePointer)
         {
-            SyncRenderingThread();
+            //SyncRenderingThread();
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexturePointer);
         }
 
         static public void ClearTexture(IntPtr targetTexturePointer)
         {
-            SyncRenderingThread();
+            //SyncRenderingThread();
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexturePointer);
         }
 

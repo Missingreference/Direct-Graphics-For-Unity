@@ -839,7 +839,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textureStepText: {fileID: 1409612600}
-  color: {r: 0, g: 0, b: 0, a: 0}
   visibleTextureIndex: 0
 --- !u!4 &1433864513
 Transform:
@@ -1049,7 +1048,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_UiScaleMode: 0
   m_ReferencePixelsPerUnit: 100
-  m_ScaleFactor: 1
+  m_ScaleFactor: 0.5
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0

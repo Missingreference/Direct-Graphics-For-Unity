@@ -45,6 +45,8 @@ private:
     
     std::vector<void*> m_Textures;
     int m_UsedTextureCount;
+    
+    id<MTLCommandQueue> m_CommandQueue;
 };
 
 
@@ -186,6 +188,8 @@ void RenderAPI_Metal::ProcessDeviceEvent(UnityGfxDeviceEventType type, IUnityInt
 		MTLDepthStencilDescriptorClass      = NSClassFromString(@"MTLDepthStencilDescriptor");
 
 		CreateResources();
+        
+        m_CommandQueue = [m_MetalGraphics->MetalDevice() newCommandQueue];
 	}
 	else if (type == kUnityGfxDeviceEventShutdown)
 	{
@@ -233,7 +237,6 @@ bool RenderAPI_Metal::CreateTexture(int width, int height, int pixelFormat, int 
     MTLTextureDescriptor *textureDescriptor = [[MTLTextureDescriptor alloc] init];
 
     textureDescriptor.pixelFormat = pixelFormat;
-    
     textureDescriptor.width = (unsigned int)width;
     textureDescriptor.height = (unsigned int)height;
     
@@ -265,15 +268,15 @@ void* RenderAPI_Metal::GetTexturePointer(int textureIndex)
 
 void RenderAPI_Metal::SetTextureColor(float red, float green, float blue, float alpha, void* targetTexture)
 {
-    
     MTLRenderPassDescriptor *rpdesc = [MTLRenderPassDescriptor renderPassDescriptor];
     rpdesc.colorAttachments[0].clearColor = MTLClearColorMake((double)red, (double)green, (double)blue, (double)alpha);
     rpdesc.colorAttachments[0].loadAction = MTLLoadActionClear;
     rpdesc.colorAttachments[0].texture = (__bridge id<MTLTexture>)targetTexture;
-    m_MetalGraphics->EndCurrentCommandEncoder();
-    id<MTLCommandBuffer> commandBuffer = m_MetalGraphics->CurrentCommandBuffer();
-    id <MTLRenderCommandEncoder> commandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:rpdesc];
+    
+    id<MTLCommandBuffer> buffer = [m_CommandQueue commandBuffer];
+    id <MTLRenderCommandEncoder> commandEncoder = [buffer renderCommandEncoderWithDescriptor:rpdesc];
     [commandEncoder endEncoding];
+    [buffer commit];
 }
 
 #endif // #if SUPPORT_METAL
