@@ -705,7 +705,6 @@ void RenderAPI_Vulkan::ImmediateDestroyVulkanBuffer(const VulkanBuffer& buffer)
 
     if (buffer.mapped && buffer.deviceMemory != VK_NULL_HANDLE)
         vkUnmapMemory(m_Instance.device, buffer.deviceMemory);
-
     if (buffer.deviceMemory != VK_NULL_HANDLE)
         vkFreeMemory(m_Instance.device, buffer.deviceMemory, NULL);
 }
@@ -859,8 +858,13 @@ bool RenderAPI_Vulkan::CreateTexture(int width, int height, int format, int text
 
 void RenderAPI_Vulkan::DestroyTexture(int textureIndex)
 {
-    vkDestroyImage(m_Instance.device, m_Textures[textureIndex]->image, nullptr);
-    vkFreeMemory(m_Instance.device, m_Textures[textureIndex]->memory.memory, nullptr);
+    if(textureIndex >= m_UsedTextureCount || m_Textures[textureIndex] == nullptr)
+        return;
+
+    if(m_Textures[textureIndex]->image != VK_NULL_HANDLE)
+        vkDestroyImage(m_Instance.device, m_Textures[textureIndex]->image, NULL);
+    if(m_Textures[textureIndex]->memory.memory != VK_NULL_HANDLE)
+        vkFreeMemory(m_Instance.device, m_Textures[textureIndex]->memory.memory, NULL);
     delete m_Textures[textureIndex];
     m_Textures[textureIndex] = nullptr;
 }

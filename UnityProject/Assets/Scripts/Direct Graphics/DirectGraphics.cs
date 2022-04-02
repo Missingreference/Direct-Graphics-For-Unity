@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -85,8 +86,9 @@ namespace Elanetic.Graphics
             }
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
-#endif
+#else
             Application.quitting += DestroyAllTextures;
+#endif
         }
 
         /// <summary>
@@ -113,6 +115,10 @@ namespace Elanetic.Graphics
                 throw new ArgumentException("The width and height of the texture to be created must be more than zero. Inputted size: " + width.ToString() + ", " + height.ToString());
             }
 #endif
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
+                SyncRenderingThread();
+#endif
             int textureIndex = CreateNativeTexture(width, height, TEXTURE_FORMAT_LOOKUP[(int)textureFormat]);
             if(textureIndex < 0)
             {
@@ -123,6 +129,8 @@ namespace Elanetic.Graphics
             DirectTexture2D directTexture = new DirectTexture2D(textureIndex, width, height, textureFormat, GetNativeTexturePointer(textureIndex));
             if(textureIndex >= m_AllTextures.Count)
             {
+                while(textureIndex > m_AllTextures.Count)
+                    m_AllTextures.Add(null);
                 m_AllTextures.Add(directTexture);
             }
             else
@@ -151,36 +159,51 @@ namespace Elanetic.Graphics
         /// </summary>
         static public void CopyTexture(IntPtr sourceNativePointer, int sourceX, int sourceY, int width, int height, IntPtr destinationNativePointer, int destinationX, int destinationY)
         {
-            SyncRenderingThread();
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
+                SyncRenderingThread();
+#endif
             CopyTextures(sourceNativePointer, sourceX, sourceY, width, height, destinationNativePointer, destinationX, destinationY);
         }
 
         static public void ClearTexture(Color color, Texture2D targetTexture)
         {
-            //SyncRenderingThread();
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
+                SyncRenderingThread();
+#endif
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Texture2D targetTexture)
         {
-           // SyncRenderingThread();
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
+                SyncRenderingThread();
+#endif
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Color color, IntPtr targetTexturePointer)
         {
-            //SyncRenderingThread();
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
+                SyncRenderingThread();
+#endif
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexturePointer);
         }
 
         static public void ClearTexture(IntPtr targetTexturePointer)
         {
-            //SyncRenderingThread();
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
+                SyncRenderingThread();
+#endif
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexturePointer);
         }
 
-        static private DirectTexture2D m_SyncTexture;
-        static private int m_LastEncodeFrame = -1;
+        static private Texture2D m_SyncTexture;
+        static private int m_LastEncodeFrame = -2;
         static private void SyncRenderingThread()
         {
             if(m_LastEncodeFrame < Time.renderedFrameCount)
@@ -191,10 +214,11 @@ namespace Elanetic.Graphics
                 //Very little information on this is found online regarding this issue so it can only be assumed that it is how Unity itself works.
                 //The working hypothesis is that if the Unity's command buffer is committed while trying to create an encoder or actively encoding this assertion will hit and crash Unity. Safety checks don't fix this.
                 //A better fix would be to queue these encodes and then wait for an event for when the command buffer is available. Blocking the main thread like this is slow and bad.
+                //Update: Fixed this for Metal by making another CommandQueue and CommandBuffer as if I know how to program Metal graphics.
 
                 //Now as for Vulkan... The Unity editor crashes when you open the Build Settings and/or Player Settings. Stacktrace stops at RenderAPI_Vulkan::DoCopyTexture.
                 //Crashes in Vulkan build right away.
-                m_SyncTexture.texture.GetNativeTexturePtr();
+                m_SyncTexture.GetNativeTexturePtr();
                 m_LastEncodeFrame = Time.renderedFrameCount;
             }
         }
@@ -203,7 +227,7 @@ namespace Elanetic.Graphics
         {
             if(m_SyncTexture != null) return;
 
-            m_SyncTexture = CreateTexture(1, 1, TextureFormat.R8);
+            m_SyncTexture = new Texture2D(1, 1, TextureFormat.R8, false, false);
         }
 #if UNITY_EDITOR
         static private void OnPlayModeChanged(PlayModeStateChange state)
@@ -211,17 +235,26 @@ namespace Elanetic.Graphics
             if(state == PlayModeStateChange.EnteredEditMode)
             {
                 DestroyAllTextures();
+
+                if(m_SyncTexture != null)
+                    UnityEngine.Object.Destroy(m_SyncTexture);
             }
         }
 #endif
+
+        static internal void DestroyDirectTexture(int textureIndex)
+        {
+            m_AllTextures[textureIndex] = null;
+            DestroyNativeTexture(textureIndex);
+        }
 
         static private void DestroyAllTextures()
         {
             for(int i = 0; i < m_AllTextures.Count; i++)
             {
-                m_AllTextures[i].Destroy();
+                if(m_AllTextures[i] != null)
+                    m_AllTextures[i].Destroy();
             }
-            m_AllTextures.Clear();
         }
     }
 

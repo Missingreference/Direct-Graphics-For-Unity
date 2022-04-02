@@ -27,9 +27,9 @@ public class DirectGraphicsTest : MonoBehaviour
 	public TextMeshProUGUI textureStepText;
 
 	Texture2D unityTexture;
-	IntPtr unityTexturePointer;
 	DirectTexture2D sourceDirectTexture;
 	DirectTexture2D destinationDirectTexture;
+	DirectTexture2D destinationDirectTexture4;
 
 	void Start()
 	{
@@ -56,22 +56,58 @@ public class DirectGraphicsTest : MonoBehaviour
 
 
 		unityTexture = new Texture2D(1024, 1024, TextureFormat.RGBA32, false, true);
-		unityTexturePointer = unityTexture.GetNativeTexturePtr();
 		sourceDirectTexture = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
 		DirectGraphics.ClearTexture(Color.red, sourceDirectTexture.texture);
 		destinationDirectTexture = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
-
+		destinationDirectTexture4 = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
 		rawImage1.texture = sourceDirectTexture.texture;
 		rawImage2.texture = destinationDirectTexture.texture;
 		rawImage3.texture = unityTexture;
+		rawImage4.texture = destinationDirectTexture4.texture;
+
+		//sourceDirectTexture.Destroy();
+
+		for(int i = 0; i < 1500; i++)
+		{
+			//DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
+		}
+
+        for(int i = 0; i < dtCount; i++)
+        {
+			dts.Add(null);
+        }
 	}
+
+
 
 	[Range(0,511)]
 	public int visibleTextureIndex;
 
 	int textureTestStep = -1;
-    void Update()
+	int dtCount = 5;
+	List<DirectTexture2D> dts = new List<DirectTexture2D>();
+	void Update()
 	{
+
+		for(int i = 0; i < dtCount; i++)
+		{
+			dts[i]?.Destroy();
+
+			dts[i] = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
+
+			//DirectGraphics.ClearTexture(new Color(UnityEngine.Random.Range(0.0f, 1.0f), UnityEngine.Random.Range(0.0f, 1.0f), UnityEngine.Random.Range(0.0f, 1.0f), UnityEngine.Random.Range(0.0f, 1.0f)), destinationDirectTexture.nativePointer);
+			//DirectGraphics.CopyTexture(destinationDirectTexture.nativePointer, 0,0, destinationDirectTexture.texture.width, destinationDirectTexture.texture.height, destinationDirectTexture4.nativePointer, 0,0);
+		}
+		return;
+		for(int i = 0; i < 1; i++)
+		{
+			if(Time.renderedFrameCount % 5 == 0)
+			{
+				//DirectGraphics.ClearTexture(Color.blue, sourceDirectTexture.nativePointer);
+				sourceDirectTexture.Destroy();
+				sourceDirectTexture = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
+			}
+		}
 
 		if(Input.GetKeyDown(KeyCode.P))
 		{

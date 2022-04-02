@@ -1,8 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using UnityEngine;
+using Debug = UnityEngine.Debug;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Elanetic.Graphics
 {
@@ -27,18 +32,35 @@ namespace Elanetic.Graphics
             this.nativePointer = nativePointer;
 
             texture = Texture2D.CreateExternalTexture(width, height, format, false, true, nativePointer);
+
             texture.filterMode = FilterMode.Point;
             m_FrameCreated = Time.renderedFrameCount;
         }
 
         private Coroutine m_DestructionCoroutine;
-        
+#if UNITY_EDITOR
+        static private Stopwatch m_EditorDestructionTimer = new Stopwatch();
+#endif
         /// <summary>
         /// Be aware that a texture pointing to an invalid texture from destruction causes Unity to view the invalid data differently based on Graphics API used. 
         /// For example, Metal shows a destroyed texture as a clear texture while Vulkan shows as a black texture.
         /// </summary>
         public void Destroy()
         {
+#if UNITY_EDITOR
+            if(!Application.isPlaying)
+            {
+                if(!m_EditorDestructionTimer.IsRunning && m_EditorDestructionTimer.ElapsedMilliseconds < 3.0f) 
+                    m_EditorDestructionTimer.Start();
+                while(m_EditorDestructionTimer.ElapsedMilliseconds < 1.5f) continue;
+                if(texture != null)
+                    UnityEngine.Object.DestroyImmediate(texture);
+                while(m_EditorDestructionTimer.ElapsedMilliseconds < 3.0f) continue;
+                DirectGraphics.DestroyDirectTexture(m_TextureIndex);
+                return;
+            }
+#endif
+
             if(isDestroyed) return;
 
 #if SAFE_EXECUTION
@@ -80,24 +102,58 @@ namespace Elanetic.Graphics
             }
             else
             {
-                DoDestroy();
+                DestroyUnityReference();
             }
         }
 
-        private void DoDestroy()
+        private void DestroyUnityReference()
         {
-            UnityEngine.Object.Destroy(texture);
-            DirectGraphics.DestroyNativeTexture(m_TextureIndex);
+            //We have to destroy Unity's texture first before freeing the memory of the texture in the plugin otherwise crashes occur.
+            UnityEngine.Object.DestroyImmediate(texture);
+            //But that also means we can't free the memory too quickly since Unity makes calls to their Vulkan API in seperate threads causing a race condition.
+            //This means we have to delay freeing the GPU memory in hopes of getting past the race condition. See below for more info.
+            //It sure would make way more sense to implement this logic in the plugin itself. A more experienced C/C++ programmer is welcome to do this.
+            m_DestructionCoroutine = m_DestroyerObject.StartCoroutine(OnEndFrame());
         }
 
-
+        //This clustersuck is a result of trying to get past race conditions.
+        //On Vulkan(Windows), in testing on editor and standalone build it was found that calling vkFreeMemory in Vulkan plugin was causing Unity to freeze as if it was stuck in an infinite loop with no errors in log files.
+        //Furthermore it was found when minimizing the standalone build(not the case in the editor) the FPS would shoot up to something like 800 frames per second if running in the background is enabled causing the race condition to be hit dispite the 2 frame window.
+        //Thus as a result "if(Time.unscaledTimeAsDouble < 0.005)new WaitForSecondsRealtime(2.0f);" was born and appears to work. Try not to create and destroy too too many textures to fill up all the memory within 2 seconds alright?
+        private int m_LastRenderedFrame = -1;
         private IEnumerator OnEndFrame()
         {
-            //Delay destroy by 2 frames to hopefully ensure the race condition has passed
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
+            if(Time.unscaledTimeAsDouble < 0.005)
+            {
+                new WaitForSecondsRealtime(2.0f);
+            }
+            else
+            {
+                m_LastRenderedFrame = Time.renderedFrameCount;
+                while(m_LastRenderedFrame == Time.renderedFrameCount)
+                    yield return new WaitForEndOfFrame();
+                if(Time.unscaledTimeAsDouble < 0.005)
+                {
+                    new WaitForSecondsRealtime(2.0f);
+                }
+                else
+                {
+                    m_LastRenderedFrame = Time.renderedFrameCount;
+                    while(m_LastRenderedFrame == Time.renderedFrameCount)
+                        yield return new WaitForEndOfFrame();
+                }
+            }
+
             m_DestroyerObject.StopCoroutine(m_DestructionCoroutine);
-            DoDestroy();
+
+            if(texture != null)
+            {
+                DestroyUnityReference();
+            }
+            else
+            {
+                DirectGraphics.DestroyDirectTexture(m_TextureIndex);
+            }
         }
 
         private static Direct2DTextureDestroyer m_DestroyerObject = null;
