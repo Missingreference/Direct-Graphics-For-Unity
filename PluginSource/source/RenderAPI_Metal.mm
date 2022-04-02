@@ -257,6 +257,8 @@ bool RenderAPI_Metal::CreateTexture(int width, int height, int pixelFormat, int 
 
 void RenderAPI_Metal::DestroyTexture(int textureIndex)
 {
+    if(m_Textures[textureIndex] == nullptr) return;
+    
     CFBridgingRelease(m_Textures[textureIndex]);
     m_Textures[textureIndex] = nullptr;
 }
