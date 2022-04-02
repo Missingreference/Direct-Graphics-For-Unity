@@ -90,7 +90,7 @@ namespace Elanetic.Graphics
                 //Destruction of our VkImage reference too early causes a crash.
                 //Wait a couple frames just to be safe.
 
-                if(ReferenceEquals(m_DestroyerObject,null))
+                if(ReferenceEquals(m_DestroyerObject, null))
                 {
                     m_DestroyerObject = new GameObject("Direct Texture2D Destroyer").AddComponent<Direct2DTextureDestroyer>();
                 }
@@ -98,7 +98,7 @@ namespace Elanetic.Graphics
                 {
                     return;
                 }
-                m_DestructionCoroutine = m_DestroyerObject.StartCoroutine(OnEndFrame());
+                m_DestructionCoroutine = m_DestroyerObject.StartCoroutine(WaitAndDestroyUnityTexture());
             }
             else
             {
@@ -113,7 +113,7 @@ namespace Elanetic.Graphics
             //But that also means we can't free the memory too quickly since Unity makes calls to their Vulkan API in seperate threads causing a race condition.
             //This means we have to delay freeing the GPU memory in hopes of getting past the race condition. See below for more info.
             //It sure would make way more sense to implement this logic in the plugin itself. A more experienced C/C++ programmer is welcome to do this.
-            m_DestructionCoroutine = m_DestroyerObject.StartCoroutine(OnEndFrame());
+            m_DestructionCoroutine = m_DestroyerObject.StartCoroutine(WaitAndDestroyNativeTexture());
         }
 
         //This clustersuck is a result of trying to get past race conditions.
@@ -121,11 +121,30 @@ namespace Elanetic.Graphics
         //Furthermore it was found when minimizing the standalone build(not the case in the editor) the FPS would shoot up to something like 800 frames per second if running in the background is enabled causing the race condition to be hit dispite the 2 frame window.
         //Thus as a result "if(Time.unscaledTimeAsDouble < 0.005)new WaitForSecondsRealtime(2.0f);" was born and appears to work. Try not to create and destroy too too many textures to fill up all the memory within 2 seconds alright?
         private int m_LastRenderedFrame = -1;
-        private IEnumerator OnEndFrame()
+        private IEnumerator WaitAndDestroyUnityTexture()
+        {
+            yield return WaitSetTime();
+
+            m_DestroyerObject.StopCoroutine(m_DestructionCoroutine);
+
+            DestroyUnityReference();
+        }
+
+        private IEnumerator WaitAndDestroyNativeTexture()
+        {
+            yield return WaitSetTime();
+
+            m_DestroyerObject.StopCoroutine(m_DestructionCoroutine);
+
+            DirectGraphics.DestroyDirectTexture(m_TextureIndex);
+        }
+
+        //The amount of time to wait in hopes that we pass the race condition
+        private IEnumerator WaitSetTime()
         {
             if(Time.unscaledTimeAsDouble < 0.005)
             {
-                new WaitForSecondsRealtime(2.0f);
+                yield return new WaitForSecondsRealtime(2.0f);
             }
             else
             {
@@ -134,7 +153,7 @@ namespace Elanetic.Graphics
                     yield return new WaitForEndOfFrame();
                 if(Time.unscaledTimeAsDouble < 0.005)
                 {
-                    new WaitForSecondsRealtime(2.0f);
+                    yield return new WaitForSecondsRealtime(2.0f);
                 }
                 else
                 {
@@ -142,17 +161,6 @@ namespace Elanetic.Graphics
                     while(m_LastRenderedFrame == Time.renderedFrameCount)
                         yield return new WaitForEndOfFrame();
                 }
-            }
-
-            m_DestroyerObject.StopCoroutine(m_DestructionCoroutine);
-
-            if(texture != null)
-            {
-                DestroyUnityReference();
-            }
-            else
-            {
-                DirectGraphics.DestroyDirectTexture(m_TextureIndex);
             }
         }
 
