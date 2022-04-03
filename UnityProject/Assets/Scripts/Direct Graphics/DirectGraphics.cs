@@ -10,6 +10,7 @@ using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.Rendering;
+using Debug = UnityEngine.Debug;
 
 using Elanetic.Graphics.Internal;
 
@@ -115,11 +116,10 @@ namespace Elanetic.Graphics
                 throw new ArgumentException("The width and height of the texture to be created must be more than zero. Inputted size: " + width.ToString() + ", " + height.ToString());
             }
 #endif
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
-                SyncRenderingThread();
-#endif
+            SyncRenderingThread();
+
             int textureIndex = CreateNativeTexture(width, height, TEXTURE_FORMAT_LOOKUP[(int)textureFormat]);
+
             if(textureIndex < 0)
             {
                 //Comment out this exception if implementing a new graphics API for debugging purposes. Sometimes if your lucky you'll get a stack trace from Unity's editor log file for the dll.
@@ -159,46 +159,31 @@ namespace Elanetic.Graphics
         /// </summary>
         static public void CopyTexture(IntPtr sourceNativePointer, int sourceX, int sourceY, int width, int height, IntPtr destinationNativePointer, int destinationX, int destinationY)
         {
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
-                SyncRenderingThread();
-#endif
+            SyncRenderingThread();
             CopyTextures(sourceNativePointer, sourceX, sourceY, width, height, destinationNativePointer, destinationX, destinationY);
         }
 
         static public void ClearTexture(Color color, Texture2D targetTexture)
         {
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
-                SyncRenderingThread();
-#endif
+            SyncRenderingThread();
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Texture2D targetTexture)
         {
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
-                SyncRenderingThread();
-#endif
+            SyncRenderingThread();
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Color color, IntPtr targetTexturePointer)
         {
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
-                SyncRenderingThread();
-#endif
+            SyncRenderingThread();
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexturePointer);
         }
 
         static public void ClearTexture(IntPtr targetTexturePointer)
         {
-#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-            if(SystemInfo.graphicsDeviceType == GraphicsDeviceType.Vulkan)
-                SyncRenderingThread();
-#endif
+            SyncRenderingThread();
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexturePointer);
         }
 
