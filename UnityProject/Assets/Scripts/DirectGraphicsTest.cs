@@ -64,50 +64,11 @@ public class DirectGraphicsTest : MonoBehaviour
 		rawImage2.texture = destinationDirectTexture.texture;
 		rawImage3.texture = unityTexture;
 		rawImage4.texture = destinationDirectTexture4.texture;
-
-		//sourceDirectTexture.Destroy();
-
-		for(int i = 0; i < 1500; i++)
-		{
-			//DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
-		}
-
-        for(int i = 0; i < dtCount; i++)
-        {
-			dts.Add(null);
-        }
 	}
 
-
-
-	[Range(0,511)]
-	public int visibleTextureIndex;
-
 	int textureTestStep = -1;
-	int dtCount = 5;
-	List<DirectTexture2D> dts = new List<DirectTexture2D>();
 	void Update()
 	{
-
-		for(int i = 0; i < dtCount; i++)
-		{
-			dts[i]?.Destroy();
-
-			dts[i] = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
-
-			//DirectGraphics.ClearTexture(new Color(UnityEngine.Random.Range(0.0f, 1.0f), UnityEngine.Random.Range(0.0f, 1.0f), UnityEngine.Random.Range(0.0f, 1.0f), UnityEngine.Random.Range(0.0f, 1.0f)), destinationDirectTexture.nativePointer);
-			//DirectGraphics.CopyTexture(destinationDirectTexture.nativePointer, 0,0, destinationDirectTexture.texture.width, destinationDirectTexture.texture.height, destinationDirectTexture4.nativePointer, 0,0);
-		}
-		return;
-		for(int i = 0; i < 1; i++)
-		{
-			if(Time.renderedFrameCount % 5 == 0)
-			{
-				//DirectGraphics.ClearTexture(Color.blue, sourceDirectTexture.nativePointer);
-				sourceDirectTexture.Destroy();
-				sourceDirectTexture = DirectGraphics.CreateTexture(1024, 1024, TextureFormat.RGBA32);
-			}
-		}
 
 		if(Input.GetKeyDown(KeyCode.P))
 		{
@@ -151,11 +112,6 @@ public class DirectGraphicsTest : MonoBehaviour
                     break;
             }
 
-        }
-
-		if(textureTestStep == 7)
-        {
-			rawImage2.texture = directTextures[visibleTextureIndex].texture;
         }
 	}
 
