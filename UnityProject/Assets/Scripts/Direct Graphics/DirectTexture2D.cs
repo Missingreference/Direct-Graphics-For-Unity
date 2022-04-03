@@ -90,11 +90,7 @@ namespace Elanetic.Graphics
                 //Destruction of our VkImage reference too early causes a crash.
                 //Wait a couple frames just to be safe.
 
-                if(ReferenceEquals(m_DestroyerObject, null))
-                {
-                    m_DestroyerObject = new GameObject("Direct Texture2D Destroyer").AddComponent<Direct2DTextureDestroyer>();
-                }
-                else if(m_DestroyerObject.unityIsQuitting)
+                if(m_DestroyerObject.unityIsQuitting)
                 {
                     return;
                 }
@@ -168,6 +164,15 @@ namespace Elanetic.Graphics
 
         private class Direct2DTextureDestroyer : MonoBehaviour
         {
+            [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+            static private void OnRuntimeLoad()
+            {
+                if(ReferenceEquals(m_DestroyerObject, null))
+                {
+                    m_DestroyerObject = new GameObject("Direct Texture2D Destroyer").AddComponent<Direct2DTextureDestroyer>();
+                }
+            }
+
             public bool unityIsQuitting { get; private set; }
 
             void Awake()
