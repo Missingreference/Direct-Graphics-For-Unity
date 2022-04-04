@@ -218,20 +218,19 @@ void RenderAPI_Metal::EndModifyTexture(void* textureHandle, int textureWidth, in
 
 void RenderAPI_Metal::DoCopyTexture(void *sourceTexture, int sourceX, int sourceY, int sourceWidth, int sourceHeight, void *destinationTexture, int destinationX, int destinationY)
 {
-    m_MetalGraphics->EndCurrentCommandEncoder();
-    
     id<MTLTexture> sourceTex = (__bridge id<MTLTexture>)sourceTexture;
     id<MTLTexture> destinationTex = (__bridge id<MTLTexture>)destinationTexture;
-    //id<MTLCommandBuffer> commandBuffer = m_MetalGraphics->CurrentCommandBuffer();
     
-    id<MTLCommandBuffer> commandBuffer = [m_CommandQueue commandBuffer];
+    //m_MetalGraphics->EndCurrentCommandEncoder();
+    id<MTLCommandBuffer> commandBuffer = m_MetalGraphics->CurrentCommandBuffer();
+    //id<MTLCommandBuffer> commandBuffer = [m_CommandQueue commandBuffer];
     
     id<MTLBlitCommandEncoder> blitCommand = [commandBuffer blitCommandEncoder];
-    [blitCommand optimizeContentsForGPUAccess:sourceTex];
-    [blitCommand optimizeContentsForGPUAccess:destinationTex];
+    //[blitCommand optimizeContentsForGPUAccess:sourceTex];
+    //[blitCommand optimizeContentsForGPUAccess:destinationTex];
     [blitCommand copyFromTexture:sourceTex sourceSlice:0 sourceLevel:0 sourceOrigin:MTLOriginMake(sourceX,sourceY,0) sourceSize:MTLSizeMake(sourceWidth, sourceHeight, 1) toTexture:destinationTex destinationSlice:0 destinationLevel:0 destinationOrigin:MTLOriginMake(destinationX,destinationY,0)];
     [blitCommand endEncoding];
-    [commandBuffer commit];
+    //[commandBuffer commit];
 }
 
 bool RenderAPI_Metal::CreateTexture(int width, int height, int pixelFormat, int textureIndex)
