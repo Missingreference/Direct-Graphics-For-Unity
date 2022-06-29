@@ -82,14 +82,29 @@ namespace Elanetic.Graphics
                     TEXTURE_FORMAT_LOOKUP = NativeTextureFormatLookup.VULKAN_LOOKUP;
                     break;
                 default:
-                    //Native implementation of the target Graphics API needs to be implemented.
-                    throw new NotSupportedException("DirectGraphics is not supported for Graphics API '" + SystemInfo.graphicsDeviceType + "'.");
+#if UNITY_EDITOR
+                    if(Application.isPlaying)
+#endif
+                        //Native implementation of the target Graphics API needs to be implemented.
+                        throw new NotSupportedException("DirectGraphics is not supported for Graphics API '" + SystemInfo.graphicsDeviceType + "'. Choose a supported Graphics API by going to Project Settings -> Other Settings and disable Auto Graphics API for the platform you are currently targeting and disable any non-supported APIs.");
+                    break;
             }
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
 #else
             Application.quitting += DestroyAllTextures;
 #endif
+        }
+
+        static private bool IsSupported()
+        {
+            for(int i = 0; i < SUPPORTED_GRAPHICS_API.Length; i++)
+            {
+                if(SystemInfo.graphicsDeviceType == SUPPORTED_GRAPHICS_API[i])
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -99,6 +114,11 @@ namespace Elanetic.Graphics
         static public DirectTexture2D CreateTexture(int width, int height, TextureFormat textureFormat)
         {
 #if SAFE_EXECUTION
+            if(!IsSupported())
+            {
+                //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
+                throw new NotSupportedException("DirectGraphics is not supported for Graphics API '" + SystemInfo.graphicsDeviceType + "'. Choose a supported Graphics API by going to Project Settings -> Other Settings and disable Auto Graphics API for the platform you are currently targeting and disable any non-supported APIs.");
+            }
             if(((int)textureFormat) < 0 || ((int)textureFormat) > 74)
             {
                 throw new ArgumentException("Inputted texture format '" + textureFormat.ToString() + "' is not a valid texture format.", nameof(textureFormat));
@@ -159,30 +179,65 @@ namespace Elanetic.Graphics
         /// </summary>
         static public void CopyTexture(IntPtr sourceNativePointer, int sourceX, int sourceY, int width, int height, IntPtr destinationNativePointer, int destinationX, int destinationY)
         {
+#if SAFE_EXECUTION
+            if(!IsSupported())
+            {
+                //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
+                throw new NotSupportedException("DirectGraphics is not supported for Graphics API '" + SystemInfo.graphicsDeviceType + "'. Choose a supported Graphics API by going to Project Settings -> Other Settings and disable Auto Graphics API for the platform you are currently targeting and disable any non-supported APIs.");
+            }
+#endif
             SyncRenderingThread();
             CopyTextures(sourceNativePointer, sourceX, sourceY, width, height, destinationNativePointer, destinationX, destinationY);
         }
 
         static public void ClearTexture(Color color, Texture2D targetTexture)
         {
+#if SAFE_EXECUTION
+            if(!IsSupported())
+            {
+                //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
+                throw new NotSupportedException("DirectGraphics is not supported for Graphics API '" + SystemInfo.graphicsDeviceType + "'. Choose a supported Graphics API by going to Project Settings -> Other Settings and disable Auto Graphics API for the platform you are currently targeting and disable any non-supported APIs.");
+            }
+#endif
             SyncRenderingThread();
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Texture2D targetTexture)
         {
+#if SAFE_EXECUTION
+            if(!IsSupported())
+            {
+                //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
+                throw new NotSupportedException("DirectGraphics is not supported for Graphics API '" + SystemInfo.graphicsDeviceType + "'. Choose a supported Graphics API by going to Project Settings -> Other Settings and disable Auto Graphics API for the platform you are currently targeting and disable any non-supported APIs.");
+            }
+#endif
             SyncRenderingThread();
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexture.GetNativeTexturePtr());
         }
 
         static public void ClearTexture(Color color, IntPtr targetTexturePointer)
         {
+#if SAFE_EXECUTION
+            if(!IsSupported())
+            {
+                //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
+                throw new NotSupportedException("DirectGraphics is not supported for Graphics API '" + SystemInfo.graphicsDeviceType + "'. Choose a supported Graphics API by going to Project Settings -> Other Settings and disable Auto Graphics API for the platform you are currently targeting and disable any non-supported APIs.");
+            }
+#endif
             SyncRenderingThread();
             SetTextureColor(color.r, color.g, color.b, color.a, targetTexturePointer);
         }
 
         static public void ClearTexture(IntPtr targetTexturePointer)
         {
+#if SAFE_EXECUTION
+            if(!IsSupported())
+            {
+                //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
+                throw new NotSupportedException("DirectGraphics is not supported for Graphics API '" + SystemInfo.graphicsDeviceType + "'. Choose a supported Graphics API by going to Project Settings -> Other Settings and disable Auto Graphics API for the platform you are currently targeting and disable any non-supported APIs.");
+            }
+#endif
             SyncRenderingThread();
             SetTextureColor(0.0f, 0.0f, 0.0f, 0.0f, targetTexturePointer);
         }
