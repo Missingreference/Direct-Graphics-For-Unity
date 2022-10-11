@@ -1,0 +1,12 @@
+{
+  "name": "com.elanetic.directgraphics",
+  "version": "0.0.1",
+  "displayName": "Direct Graphics",
+  "description": "A direct implementation of the Graphics API used in Unity. Used for texture modification work to be conducted on the GPU as much as possible.",
+  "author": {
+    "name": "Elanetic",
+    "email": "Isaac@elanetic.net",
+    "url": "https://www.elanetic.net"
+  },
+  "type": "library"
+}

@@ -1,0 +1,1 @@
+Direct Graphics is being developed by Elanetic on github. To view the open source repository or read up on how to use the code within including documentation and support head to this URL: https://github.com/Missingreference/Direct-Graphics-For-Unity
