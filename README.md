@@ -4,8 +4,11 @@ A direct implementation of the Graphics API used in Unity. Used for Texture2D mo
 ### Installation
 
 To simply add Direct Graphics to your Unity project as a package:
+
 -In the Unity Editor open up the Package Manager by going to Window -> Package Manager.
+
 -At the top left of the Package Manager window press the plus button and press 'Add package from git URL' or similar.
+
 -Submit ```https://github.com/Missingreference/Direct-Graphics-For-Unity.git?path=/UnityProject/Packages/com.elanetic.directgraphics``` as the URL and the Package Manager should add the package to your project.
 
 Alternatively if you would like to view the code not as a package you can navigate to the subfolder in this repository located at 'UnityProject/Packages/com.elanetic.directgraphics'.
