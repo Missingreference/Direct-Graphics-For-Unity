@@ -1,6 +1,15 @@
 # Direct Graphics For Unity
 A direct implementation of the Graphics API used in Unity. Used for Texture2D modification on the GPU as much as possible. 
 
+### Installation
+
+To simply add Direct Graphics to your Unity project as a package:
+-In the Unity Editor open up the Package Manager by going to Window -> Package Manager.
+-At the top left of the Package Manager window press the plus button and press 'Add package from git URL' or similar.
+-Submit ```https://github.com/Missingreference/Direct-Graphics-For-Unity.git?path=/UnityProject/Packages/com.elanetic.directgraphics``` as the URL and the Package Manager should add the package to your project.
+
+Alternatively if you would like to view the code not as a package you can navigate to the subfolder in this repository located at 'UnityProject/Packages/com.elanetic.directgraphics'.
+
 ### Features
  -Allows for copying Texture2Ds to other Texture2Ds, sorely missing from Unity itself. Even if the texture is set to not read/write enabled since that means it is for the most part operating on the GPU side.
  
