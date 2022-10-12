@@ -11,8 +11,10 @@ To simply add Direct Graphics to your Unity project as a package:
 
 -Submit ```https://github.com/Missingreference/Direct-Graphics-For-Unity.git?path=/UnityProject/Packages/com.elanetic.directgraphics``` as the URL and the Package Manager should add the package to your project.
 
-Alternatively if you would like to view the code not as a package you can navigate to the subfolder in this repository located at 'UnityProject/Packages/com.elanetic.directgraphics'.
+Alternatively if you would like to view the code not as a package you can navigate to the subfolder in this repository located at 'UnityProject/Packages/com.elanetic.directgraphics'. In addition you can browse the C/C++ graphics code in the PluginSource folder with various projects to support different graphics APIs.
 
+ **As of this time support is limited to Metal for MacOS and Vulkan for Windows. Auto Graphics must be disabled in Edit -> Project Settings -> Auto Graphics for Mac / Windows and have it set to the only supported Graphics APIs in this case Metal and Vulkan. DirectX(all versions), OpenGL, etc are currently not supported but implementation of other Unity supported APIs are possible and pull requests are welcome.**
+  
 ### Features
  -Allows for copying Texture2Ds to other Texture2Ds, sorely missing from Unity itself. Even if the texture is set to not read/write enabled since that means it is for the most part operating on the GPU side.
  
@@ -20,13 +22,11 @@ Alternatively if you would like to view the code not as a package you can naviga
  
  -Set Texture2D to a color or clear a Texture2D on the GPU as fast possible instead of using Texture2D.SetPixels.
 
- ### Notes
+### Notes
   Project setup has been forked from Unity's Native Plugin project here: https://github.com/Unity-Technologies/NativeRenderingPlugin
 
-  As of this time support is limited to Metal for MacOS and Vulkan for Windows. Auto Graphics must be disabled in Edit -> Project Settings -> Auto Graphics for Mac / Windows and have it set to the only supported Graphics APIs in this case Metal and Vulkan. DirectX(all versions), OpenGL, etc are currently not supported but implementation of other Unity supported APIs are possible and pull requests are welcome.
-  
-  ### Code Walkthrough
-  To start off the C++ plugins have their own projects that export their builds(bundle, DLL, etc) to the Unity Project plugins folder. Unity's editor needs a full restart if any changes to the plugins are made. All of the C# code is located in 'Assets/Scripts/Direct Graphics/' outside one GlobalCoroutine script used for a delayed destruction of textures.
+### Code Walkthrough
+  To start off the C++ plugins have their own projects that export their builds(bundle, DLL, etc) to the Unity Project plugins folder. Unity's editor needs a full restart if any changes to the plugins are made. All of the C# code is located in 'UnityProject/Packages/com.elanetic.directgraphics' for the core implementation and 'UnityProject/Assets/Scripts/' for test code.
   
   DirectGraphics script is the main interaction with the API with functions including CreateTexture, CopyTexture and ClearTexture. When creating a texture it returns a DirectTexture2D with a reference to a Texture2D. The reason this exists is because destroying the underlying Texture2D itself does not delete the native memory of the Graphics API, only any allocations on Unity's side. The plugins themselves manage the destruction of native graphics textures and delete any allocations as needed. This implementation uses Unity's Texture2D.CreateExternalTexture where any bad input will crash Unity. Upon exiting playmode and entering edit mode does the DirectGraphics API automatically destroy all created textures. Do not call Destroy on the created Texture2D, DirectTexture2D will handle it's destruction. Call DirectTexture2D.Destroy to clear the texture memory from the GPU. If the creation and destruction of DirectTexture2D are called too quickly(within a couple frames) it will wait a couple frames to destroy hence the the included GlobalCoroutine script.
   
