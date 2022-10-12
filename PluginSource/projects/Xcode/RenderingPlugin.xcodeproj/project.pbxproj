@@ -20,7 +20,7 @@
 		2B6899C81CF83D6200C4BA4F /* Copy Bundle into Unity project */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = ../../../UnityProject/Packages/Direct Graphics/Plugins;
+			dstPath = ../../../UnityProject/Packages/com.elanetic.directgraphics/Plugins;
 			dstSubfolderSpec = 16;
 			files = (
 				2B6899C91CF83DB000C4BA4F /* RenderingPlugin.bundle in Copy Bundle into Unity project */,
