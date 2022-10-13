@@ -63,7 +63,7 @@ namespace Elanetic.Graphics
 
             if(isDestroyed) return;
 
-#if SAFE_EXECUTION
+#if DEBUG
             if(texture == null)
                 throw new InvalidOperationException("DirectTexture2D should handle Texture2D destruction.");
 #endif

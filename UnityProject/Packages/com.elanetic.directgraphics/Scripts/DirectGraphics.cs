@@ -113,7 +113,7 @@ namespace Elanetic.Graphics
         /// </summary>
         static public DirectTexture2D CreateTexture(int width, int height, TextureFormat textureFormat)
         {
-#if SAFE_EXECUTION
+#if DEBUG
             if(!IsSupported())
             {
                 //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
@@ -179,7 +179,7 @@ namespace Elanetic.Graphics
         /// </summary>
         static public void CopyTexture(IntPtr sourceNativePointer, int sourceX, int sourceY, int width, int height, IntPtr destinationNativePointer, int destinationX, int destinationY)
         {
-#if SAFE_EXECUTION
+#if DEBUG
             if(!IsSupported())
             {
                 //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
@@ -192,7 +192,7 @@ namespace Elanetic.Graphics
 
         static public void ClearTexture(Color color, Texture2D targetTexture)
         {
-#if SAFE_EXECUTION
+#if DEBUG
             if(!IsSupported())
             {
                 //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
@@ -205,7 +205,7 @@ namespace Elanetic.Graphics
 
         static public void ClearTexture(Texture2D targetTexture)
         {
-#if SAFE_EXECUTION
+#if DEBUG
             if(!IsSupported())
             {
                 //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
@@ -218,7 +218,7 @@ namespace Elanetic.Graphics
 
         static public void ClearTexture(Color color, IntPtr targetTexturePointer)
         {
-#if SAFE_EXECUTION
+#if DEBUG
             if(!IsSupported())
             {
                 //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
@@ -231,7 +231,7 @@ namespace Elanetic.Graphics
 
         static public void ClearTexture(IntPtr targetTexturePointer)
         {
-#if SAFE_EXECUTION
+#if DEBUG
             if(!IsSupported())
             {
                 //See supported APIs under the constant variable DirectGraphics.SUPPORTED_GRAPHICS_API.
